@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolsa de Trabajo · Sanidad GVA</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bolsa GVA">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#BB2B09">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png" type="image/png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --ink:#1D1B1A;
+    --ink-soft:#5C544F;
+    --paper:#F6F2EC;
+    --paper-card:#FFFDF9;
+    --red:#BB2B09;
+    --red-deep:#8A2007;
+    --red-tint:#FBEAE4;
+    --red-tint-border:#F0C4B6;
+    --green:#2F6B4F;
+    --rust:#7A4136;
+    --gold:#FF6A45;
+    --line:#E3D9CF;
+    --line-soft:#ECE4DB;
+    --shadow: 0 1px 2px rgba(29,27,26,0.06), 0 8px 24px rgba(29,27,26,0.08);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .accent-bar{
+    height:6px;
+    background:var(--red);
+  }
+  .top{
+    padding:2.2rem 2rem 1.6rem;
+    max-width:1180px;
+    margin:0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:1.5rem;
+    flex-wrap:wrap;
+    border-bottom:1px solid var(--line);
+  }
+  .brand{
+    display:flex;
+    align-items:flex-start;
+    gap:1.1rem;
+  }
+  .brand img.logo{
+    height:64px;
+    width:auto;
+    flex-shrink:0;
+    margin-top:0.2rem;
+  }
+  .brand-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.72rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--red-deep);
+    margin:0 0 0.5rem;
+  }
+  h1{
+    font-family:'Source Serif 4',serif;
+    font-weight:600;
+    font-size:2.1rem;
+    line-height:1.15;
+    margin:0;
+    color:var(--ink);
+  }
+  .top p{
+    max-width:38ch;
+    margin:0.6rem 0 0;
+    color:var(--ink-soft);
+    font-size:0.92rem;
+    line-height:1.5;
+  }
+  .stamp{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.7rem;
+    letter-spacing:0.06em;
+    color:var(--red-deep);
+    border:1.5px solid var(--red);
+    border-radius:3px;
+    padding:0.5rem 0.8rem;
+    transform:rotate(-2deg);
+    white-space:nowrap;
+    opacity:0.85;
+  }
+
+  .layout{
+    max-width:1180px;
+    margin:0 auto;
+    padding:2rem 2rem 4rem;
+    display:grid;
+    grid-template-columns:340px 1fr;
+    gap:2rem;
+    align-items:start;
+  }
+
+  @media (max-width:860px){
+    .layout{grid-template-columns:1fr;}
+    .top{padding:2rem 1.2rem 1.4rem;}
+    .layout{padding:1.6rem 1.2rem 3rem;}
+  }
+
+  .mobile-bar{
+    display:none;
+    position:fixed;
+    left:0;right:0;bottom:0;
+    z-index:20;
+    background:var(--ink);
+    color:#F7EFEA;
+    padding:0.7rem 1.1rem;
+    justify-content:space-between;
+    align-items:center;
+    box-shadow:0 -4px 16px rgba(0,0,0,0.18);
+  }
+  .mobile-bar .lbl{
+    font-size:0.72rem;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:#D9A897;
+  }
+  .mobile-bar .val{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:1.15rem;
+    font-weight:600;
+    color:var(--gold);
+    font-variant-numeric:tabular-nums;
+  }
+  @media (max-width:860px){
+    .mobile-bar{display:flex;}
+  }
+
+  /* --- FORM --- */
+  .panel{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:1.5rem 1.4rem 1.7rem;
+    position:sticky;
+    top:1.5rem;
+    box-shadow:var(--shadow);
+  }
+  .panel h2{
+    font-family:'Source Serif 4',serif;
+    font-size:1.05rem;
+    font-weight:600;
+    margin:0 0 1.1rem;
+    color:var(--ink);
+  }
+  .field{margin-bottom:1.1rem;}
+  .field label{
+    display:block;
+    font-size:0.76rem;
+    font-weight:600;
+    letter-spacing:0.02em;
+    color:var(--ink-soft);
+    margin-bottom:0.35rem;
+    text-transform:uppercase;
+  }
+  .field .hint{
+    font-size:0.72rem;
+    color:#7C8B85;
+    margin-top:0.3rem;
+    font-weight:400;
+    text-transform:none;
+    letter-spacing:0;
+  }
+  select, input[type=number], input[type=text], input[type=email], input[type=password]{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:0.9rem;
+    padding:0.55rem 0.65rem;
+    border:1px solid var(--line);
+    border-radius:6px;
+    background:#fff;
+    color:var(--ink);
+  }
+  select:focus, input:focus{
+    outline:2px solid var(--red);
+    outline-offset:1px;
+  }
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;}
+  .checkline{
+    display:flex;
+    align-items:center;
+    gap:0.55rem;
+    padding:0.5rem 0.1rem;
+  }
+  .checkline input{width:auto;accent-color:var(--red);}
+  .checkline label{
+    margin:0;
+    text-transform:none;
+    font-size:0.85rem;
+    font-weight:500;
+    color:var(--ink);
+    letter-spacing:0;
+  }
+  hr.sep{
+    border:none;
+    border-top:1px dashed var(--line);
+    margin:1.3rem 0;
+  }
+
+  /* --- LEDGER --- */
+  .ledger{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .ledger-head{
+    position:relative;
+    padding:1.4rem 1.7rem 1.1rem;
+    border-bottom:1px dashed var(--line);
+    background:
+      radial-gradient(circle at 12px 0, transparent 6px, var(--paper-card) 6.5px) top left / 24px 12px repeat-x;
+  }
+  .ledger-head::before{
+    content:"";
+    position:absolute;
+    top:-1px;left:0;right:0;height:12px;
+    background:var(--paper);
+    border-radius:0 0 0 0;
+    -webkit-mask: radial-gradient(circle at 12px 6px, transparent 6px, black 6.5px) top / 24px 12px repeat-x;
+    mask: radial-gradient(circle at 12px 6px, transparent 6px, black 6.5px) top / 24px 12px repeat-x;
+  }
+  .ledger-head h3{
+    font-family:'Source Serif 4',serif;
+    font-size:1.15rem;
+    margin:0 0 0.15rem;
+  }
+  .ledger-head .puesto{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.78rem;
+    color:var(--red-deep);
+  }
+
+  .section{padding:1.3rem 1.7rem;}
+  .section + .section{border-top:1px solid var(--line-soft);}
+  .section h4{
+    font-family:'IBM Plex Mono',monospace;
+    text-transform:uppercase;
+    font-size:0.74rem;
+    letter-spacing:0.1em;
+    color:var(--ink-soft);
+    margin:0 0 0.8rem;
+  }
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
+  @media (max-width:640px){.cols{grid-template-columns:1fr;}}
+
+  .concept-list{list-style:none;margin:0;padding:0;}
+  .concept-list li{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:0.32rem 0;
+    font-size:0.86rem;
+    gap:0.6rem;
+  }
+  .concept-list li span:first-child{color:var(--ink-soft);}
+  .concept-list li span:last-child{
+    font-family:'IBM Plex Mono',monospace;
+    font-variant-numeric: tabular-nums;
+    font-size:0.86rem;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  .devengo span:last-child{color:var(--green);}
+  .deduccion span:last-child{color:var(--rust);}
+
+  .subtotal{
+    display:flex;justify-content:space-between;
+    font-weight:600;font-size:0.88rem;
+    border-top:1px solid var(--line);
+    margin-top:0.5rem;padding-top:0.5rem;
+  }
+  .subtotal span:last-child{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+
+  .liquido-bar{
+    margin-top:1rem;
+    background:var(--red-tint);
+    border:1px solid var(--red-tint-border);
+    border-radius:7px;
+    padding:0.7rem 1rem;
+    display:flex;justify-content:space-between;align-items:center;
+  }
+  .liquido-bar .lbl{font-size:0.82rem;font-weight:600;color:var(--red-deep);text-transform:uppercase;letter-spacing:0.04em;}
+  .liquido-bar .val{font-family:'IBM Plex Mono',monospace;font-size:1.05rem;font-weight:600;color:var(--red-deep);font-variant-numeric:tabular-nums;}
+
+  .extra-note{
+    font-size:0.78rem;
+    color:var(--ink-soft);
+    margin-top:0.9rem;
+    padding-top:0.7rem;
+    border-top:1px dashed var(--line-soft);
+  }
+  .extra-note b{color:var(--ink);font-family:'IBM Plex Mono',monospace;}
+
+  .found-box{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:0.8rem 1rem;
+    margin-top:0.4rem;
+  }
+  .found-row{
+    display:flex; justify-content:space-between; gap:0.8rem;
+    padding:0.3rem 0; font-size:0.86rem; color:var(--ink-soft);
+    border-bottom:1px dashed var(--line-soft);
+  }
+  .found-row:last-child{border-bottom:none;}
+  .found-row b{color:var(--ink); font-weight:600; text-align:right;}
+
+  .total-section{
+    background:#241411;
+    color:#F7EFEA;
+    padding:1.5rem 1.7rem 1.7rem;
+  }
+  .total-section h4{color:#D9A897;}
+  .total-rows{list-style:none;margin:0 0 1rem;padding:0;}
+  .total-rows li{
+    display:flex;justify-content:space-between;
+    padding:0.3rem 0;font-size:0.86rem;color:#DCC3B9;
+  }
+  .total-rows li span:last-child{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;}
+  .grand-total{
+    display:flex;justify-content:space-between;align-items:baseline;
+    border-top:1px solid #47231C;
+    padding-top:0.9rem;
+  }
+  .grand-total .lbl{
+    font-family:'Source Serif 4',serif;
+    font-size:1rem;
+    color:#F4F7F5;
+  }
+  .grand-total .val{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:1.65rem;
+    font-weight:600;
+    color:var(--gold);
+    font-variant-numeric:tabular-nums;
+  }
+
+  .footnote{
+    max-width:1180px;margin:0 auto;padding:0 2rem 3rem;
+    font-size:0.76rem;color:var(--ink-soft);line-height:1.6;
+  }
+  @media (max-width:860px){.footnote{padding:0 1.2rem 2.4rem;}}
+
+  /* Mobile stacking: placed last on purpose so it overrides the
+     desktop .panel/.ledger rules above at this breakpoint. */
+  @media (max-width:860px){
+    .panel{order:1;position:static;top:auto;}
+    .ledger{order:2;}
+    body{padding-bottom:64px;}
+  }
+  /* --- LOGIN OVERLAY --- */
+  .login-overlay{
+    position:fixed; inset:0;
+    background:var(--paper);
+    display:flex; align-items:center; justify-content:center;
+    z-index:9999; padding:1.5rem;
+  }
+  .login-card{
+    background:var(--paper-card);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:2rem 1.8rem;
+    max-width:420px; width:100%;
+    box-shadow:var(--shadow);
+  }
+  .login-eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:0.72rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--red-deep); margin:0 0 0.6rem;
+  }
+  .login-title{
+    font-family:'Source Serif 4',serif; font-weight:600;
+    font-size:1.5rem; line-height:1.2; margin:0 0 0.8rem; color:var(--ink);
+  }
+  .login-desc{ font-size:0.86rem; color:var(--ink-soft); line-height:1.5; margin:0 0 1.3rem; }
+  .login-error{
+    background:var(--red-tint); border:1px solid var(--red-tint-border);
+    color:var(--red-deep); font-size:0.82rem; padding:0.6rem 0.8rem;
+    border-radius:6px; margin-bottom:1rem;
+  }
+  .login-submit{ width:100%; margin-top:0.4rem; padding:0.75rem; font-size:0.95rem; }
+  .login-footnote{ font-size:0.76rem; color:var(--ink-soft); margin:1.2rem 0 0; text-align:center; }
+
+  .install-help{ margin-top:1rem; border-top:1px solid var(--line); padding-top:0.8rem; }
+  .install-help summary{
+    font-size:0.8rem; font-weight:600; color:var(--red-deep); cursor:pointer;
+    list-style:none; text-align:center;
+  }
+  .install-help summary::-webkit-details-marker{ display:none; }
+  .install-help summary::after{ content:' ▾'; }
+  .install-help[open] summary::after{ content:' ▴'; }
+  .install-help-body{ font-size:0.78rem; color:var(--ink-soft); line-height:1.5; margin-top:0.6rem; }
+  .install-help-body p{ margin:0 0 0.5rem; }
+
+  /* --- LANGUAGE SWITCH --- */
+  .lang-switch{ display:flex; justify-content:center; gap:0.4rem; margin-top:1rem; }
+  .lang-switch-app{ margin-top:0; justify-content:flex-start; }
+  .lang-btn{
+    background:#fff; border:1px solid var(--line); color:var(--ink-soft);
+    font-size:0.72rem; font-weight:700; letter-spacing:0.03em;
+    padding:0.25rem 0.55rem; border-radius:5px; cursor:pointer; font-family:'Inter',sans-serif;
+  }
+  .lang-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
+  .user-bar .lang-btn{ background:transparent; border-color:#5C4A3E; color:var(--ink-soft); }
+  .user-bar .lang-btn.active{ background:var(--red); color:#fff; border-color:var(--red); }
+
+  /* --- CONTACT LINK --- */
+  .contact-link{ margin-right:auto; }
+
+  /* --- USER BAR --- */
+  .user-bar{
+    max-width:1180px; margin:0 auto; padding:0.6rem 2rem 0;
+    display:flex; justify-content:flex-end; align-items:center; gap:0.8rem;
+    font-size:0.8rem; color:var(--ink-soft);
+  }
+  @media (max-width:860px){ .user-bar{ padding:0.6rem 1.2rem 0; } }
+  .link-btn{
+    background:none; border:none; color:var(--red-deep); text-decoration:underline;
+    cursor:pointer; font-size:0.8rem; padding:0; font-family:'Inter',sans-serif;
+  }
+
+  /* --- BUTTONS --- */
+  .btn-primary{
+    background:var(--red); color:#fff; border:none;
+    padding:0.65rem 1.1rem; border-radius:6px; font-weight:600;
+    cursor:pointer; font-size:0.9rem; font-family:'Inter',sans-serif;
+  }
+  .btn-primary:hover{ background:var(--red-deep); }
+  .btn-secondary{
+    background:#fff; color:var(--red-deep); border:1px solid var(--red);
+    padding:0.65rem 1.1rem; border-radius:6px; font-weight:600;
+    cursor:pointer; font-size:0.9rem; font-family:'Inter',sans-serif;
+  }
+  .btn-secondary:hover{ background:var(--red-tint); }
+
+  /* --- ACTIONS (inside dark total-section) --- */
+  .actions{ margin-top:1.1rem; padding-top:1rem; border-top:1px solid #47231C; }
+  .actions .field{ margin-bottom:0.8rem; }
+  .actions .field label{
+    color:#D9A897; display:block; font-size:0.76rem; font-weight:600;
+    letter-spacing:0.02em; text-transform:uppercase; margin-bottom:0.35rem;
+  }
+  .actions .field input{
+    width:100%; background:#33201B; border:1px solid #55322A; color:#F7EFEA;
+    padding:0.55rem 0.65rem; border-radius:6px; font-family:'Inter',sans-serif; font-size:0.9rem;
+  }
+  .actions-buttons{ display:flex; gap:0.7rem; flex-wrap:wrap; }
+  .actions-hint{ color:#C9A99C; margin-top:0.6rem; font-size:0.74rem; line-height:1.4; }
+
+</style>
+</head>
+<body>
+
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-card">
+    <p class="login-eyebrow">Intersindical Salut &middot; Orihuela</p>
+    <h1 class="login-title" data-i18n="app_title_html"></h1>
+    <p class="login-desc" data-i18n="login_desc"></p>
+    <form id="loginForm">
+      <div class="field">
+        <label for="loginNombre" data-i18n="label_nombre">Nombre</label>
+        <input type="text" id="loginNombre" required placeholder="Nombre" data-i18n-placeholder="label_nombre" autocomplete="given-name">
+      </div>
+      <div class="field">
+        <label for="loginCodigo" data-i18n="label_codigo">C&oacute;digo de acceso</label>
+        <input type="password" id="loginCodigo" required placeholder="C&oacute;digo facilitado por tu delegado/a" data-i18n-placeholder="placeholder_codigo" autocomplete="off">
+      </div>
+      <div id="loginError" class="login-error" style="display:none;"></div>
+      <button type="submit" class="btn-primary login-submit" data-i18n="btn_entrar">Entrar</button>
+    </form>
+    <p class="login-footnote" data-i18n="login_footnote">Pide tu c&oacute;digo a tu delegado/a sindical de Intersindical Salut en tu Departamento de Salud.</p>
+
+    <details class="install-help">
+      <summary data-i18n="install_summary">&iquest;C&oacute;mo instalar esta app en tu m&oacute;vil?</summary>
+      <div class="install-help-body">
+        <p data-i18n="install_android"><strong>En Android (Chrome):</strong> toca el men&uacute; &#8942; de arriba a la derecha y elige "Instalar aplicaci&oacute;n" o "A&ntilde;adir a pantalla de inicio".</p>
+        <p data-i18n="install_ios"><strong>En iPhone/iPad (Safari):</strong> toca el icono de compartir &#8593; de abajo y elige "A&ntilde;adir a pantalla de inicio".</p>
+        <p data-i18n="install_note">Una vez instalada, te quedar&aacute; un icono como el de cualquier otra app y podr&aacute;s usarla incluso sin conexi&oacute;n.</p>
+      </div>
+    </details>
+
+    <div class="lang-switch">
+      <button type="button" class="lang-btn" data-lang="es">ES</button>
+      <button type="button" class="lang-btn" data-lang="va">VA</button>
+    </div>
+  </div>
+</div>
+
+<div id="appRoot" style="display:none;">
+<div class="user-bar">
+  <a class="link-btn contact-link" id="contactLink" href="mailto:intersindicalorihuela@gmail.com" data-i18n="contact_text">&iquest;Ves alg&uacute;n error o tienes alguna sugerencia? Escr&iacute;benos</a>
+  <div class="lang-switch lang-switch-app">
+    <button type="button" class="lang-btn" data-lang="es">ES</button>
+    <button type="button" class="lang-btn" data-lang="va">VA</button>
+  </div>
+  <span data-i18n="session_label">Sesi&oacute;n:</span> <b id="userNombre">&mdash;</b>
+  <button type="button" id="logoutBtn" class="link-btn" data-i18n="logout_btn">Cambiar de usuario</button>
+</div>
+<div class="accent-bar"></div>
+<div class="top">
+  <div class="brand">
+    <img class="logo" src="data:image/jpeg;base64,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" alt="Intersindical Salut Orihuela">
+    <div>
+      <p class="brand-eyebrow">Intersindical Salut · Orihuela</p>
+      <h1 data-i18n="app_title_html"></h1>
+      <p data-i18n="brand_desc">Consulta tu posici&oacute;n en la bolsa de trabajo, cu&aacute;ntos candidatos activos tienes por delante, y busca a cualquier persona por nombre.</p>
+    </div>
+  </div>
+  <div class="stamp"><span data-i18n="stamp_label">▣ Datos actualizados a:</span> <span id="fechaActualizacion">—</span></div>
+</div>
+
+<div class="layout">
+
+  <!-- FORM -->
+  <div class="panel">
+    <h2 data-i18n="h2_buscador">Buscador de posici&oacute;n</h2>
+
+    <div class="field">
+      <label for="categoria" data-i18n="label_categoria">Categor&iacute;a / bolsa</label>
+      <select id="categoria"></select>
+    </div>
+
+    <div class="field">
+      <label for="puestoBuscado" data-i18n="label_puesto_num">N&ordm; de puesto</label>
+      <input type="number" id="puestoBuscado" min="1" step="1" placeholder="Ej. 350">
+      <div class="hint" data-i18n="hint_puesto_num">Escribe tu n&uacute;mero de puesto en la bolsa para consultarlo.</div>
+    </div>
+
+    <div class="field">
+      <label id="candidatoInfoLabel" data-i18n="label_candidato_info">Ese puesto corresponde a</label>
+      <div class="found-box" id="candidatoInfo">
+        <div class="found-row"><span data-i18n="fi_nombre">Nombre</span><b id="fiNombre">&mdash;</b></div>
+        <div class="found-row"><span data-i18n="fi_situacion">Situaci&oacute;n</span><b id="fiSituacion">&mdash;</b></div>
+        <div class="found-row"><span data-i18n="fi_categoria">Categor&iacute;a</span><b id="fiCategoria">&mdash;</b></div>
+        <div class="found-row"><span data-i18n="fi_departamento">Departamento</span><b id="fiDepartamento">&mdash;</b></div>
+      </div>
+    </div>
+
+    <hr class="sep">
+    <h2 data-i18n="h2_situaciones">Situaciones a contar</h2>
+    <div class="hint" data-i18n="hint_situaciones">Elige hasta 4 situaciones. Se contar&aacute;n los candidatos con CUALQUIERA de ellas que tengan un n&uacute;mero de puesto MENOR al tuyo (que van por delante).</div>
+
+    <div class="field">
+      <label for="sit1" data-i18n="label_situacion1">Situaci&oacute;n 1</label>
+      <select id="sit1"><option value="" data-i18n="opt_situacion_vacia">&mdash; Ninguna &mdash;</option></select>
+    </div>
+    <div class="field">
+      <label for="sit2" data-i18n="label_situacion2">Situaci&oacute;n 2</label>
+      <select id="sit2"><option value="" data-i18n="opt_situacion_vacia">&mdash; Ninguna &mdash;</option></select>
+    </div>
+    <div class="field">
+      <label for="sit3" data-i18n="label_situacion3">Situaci&oacute;n 3</label>
+      <select id="sit3"><option value="" data-i18n="opt_situacion_vacia">&mdash; Ninguna &mdash;</option></select>
+    </div>
+    <div class="field">
+      <label for="sit4" data-i18n="label_situacion4">Situaci&oacute;n 4</label>
+      <select id="sit4"><option value="" data-i18n="opt_situacion_vacia">&mdash; Ninguna &mdash;</option></select>
+    </div>
+
+    <hr class="sep">
+    <h2 data-i18n="h2_busqueda_nombre">Buscar por nombre</h2>
+    <div class="field">
+      <label for="buscarNombre" data-i18n="label_buscar_nombre">Apellidos, nombre o fragmento</label>
+      <input type="text" id="buscarNombre" data-i18n-placeholder="placeholder_buscar_nombre" placeholder="Escribe y pulsa Intro">
+      <div class="hint" data-i18n="hint_buscar_nombre">Busca dentro de la categor&iacute;a seleccionada arriba.</div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="ledger">
+    <div class="ledger-head">
+      <h3 data-i18n="h3_resultado">Resultado</h3>
+      <div class="puesto" id="categoriaLabel">&mdash;</div>
+    </div>
+
+    <div class="hint" id="sinDatosCategoria" style="display:none;margin:0 1.7rem 1rem;" data-i18n="sin_datos_categoria">Todavía no hay datos cargados para esta categoría. Vuelve a consultarlo tras la próxima actualización.</div>
+
+    <div class="section total-section">
+      <h4 data-i18n="h4_candidatos_delante">Candidatos por delante</h4>
+      <div class="grand-total"><span class="lbl" data-i18n="lbl_candidatos_delante">Con esas situaciones</span><span class="val" id="candidatosPorDelante">&mdash;</span></div>
+      <div class="actions-hint" data-i18n="hint_resultado">Candidatos con n&uacute;mero de puesto menor al tuyo que tienen CUALQUIERA de las situaciones marcadas.</div>
+    </div>
+
+    <div class="section">
+      <h4 data-i18n="h4_resultados_nombre">Resultados de la b&uacute;squeda por nombre</h4>
+      <ul class="concept-list" id="resultadosBusqueda"></ul>
+      <div class="hint" id="sinResultados" style="display:none;" data-i18n="sin_resultados">Sin resultados. Prueba con otro fragmento del nombre.</div>
+      <div class="hint" id="avisoTruncado" style="display:none;" data-i18n="aviso_truncado">Mostrando solo las primeras 50 coincidencias. Afina la b&uacute;squeda para ver menos resultados.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footnote" data-i18n="footnote_text">
+  Herramienta de la intersindical para el personal de la sanidad pública valenciana. Los cálculos replican las tablas retributivas 2026 del sistema, uso orientativo: si tu nómina no coincide con lo aquí calculado, contacta con tu representante sindical para revisarlo.
+</div>
+
+<div class="mobile-bar">
+  <span class="lbl" data-i18n="lbl_candidatos_delante">Con esas situaciones</span>
+  <span class="val" id="mobileCandidatosVal">—</span>
+</div>
+</div><!-- /appRoot -->
+
+<script>
+// ==================== I18N ====================
+const LANG_KEY = 'nomina_lang';
+let LANG = localStorage.getItem(LANG_KEY) || 'es';
+
+const I18N = {
+  es: {
+    app_title_html: "Bolsa de Trabajo<br>Sanidad GVA",
+    login_desc: "Acceso exclusivo para personas afiliadas a Intersindical Salut. Si no tienes código de acceso, solícitalo a tu delegado/a sindical.",
+    label_nombre: "Nombre",
+    label_codigo: "Código de acceso",
+    placeholder_codigo: "Código facilitado por tu delegado/a",
+    btn_entrar: "Entrar",
+    login_footnote: "Pide tu código a tu delegado/a sindical de Intersindical Salut en tu Departamento de Salud.",
+    install_summary: "¿Cómo instalar esta app en tu móvil?",
+    install_android: '<strong>En Android (Chrome):</strong> toca el menú ⋮ de arriba a la derecha y elige "Instalar aplicación" o "Añadir a pantalla de inicio".',
+    install_ios: '<strong>En iPhone/iPad (Safari):</strong> toca el icono de compartir ↑ de abajo y elige "Añadir a pantalla de inicio".',
+    install_note: "Una vez instalada, te quedará un icono como el de cualquier otra app y podrás usarla incluso sin conexión.",
+    session_label: "Sesión:",
+    logout_btn: "Cambiar de usuario",
+    contact_text: "¿Ves algún error o tienes alguna sugerencia? Escríbenos",
+    brand_desc: "Consulta tu posición en la bolsa de trabajo, cuántos candidatos activos tienes por delante, y busca a cualquier persona por nombre.",
+    stamp_label: "▣ Datos actualizados a:",
+    h2_buscador: "Buscador de posición",
+    label_categoria: "Categoría / bolsa",
+    label_puesto_num: "Nº de puesto",
+    hint_puesto_num: "Escribe tu número de puesto en la bolsa para consultarlo.",
+    label_candidato_info: "Ese puesto corresponde a",
+    fi_nombre: "Nombre",
+    fi_situacion: "Situación",
+    fi_categoria: "Categoría",
+    fi_departamento: "Departamento",
+    h2_situaciones: "Situaciones a contar",
+    hint_situaciones: "Elige hasta 4 situaciones. Se contarán los candidatos con CUALQUIERA de ellas que tengan un número de puesto MENOR al tuyo (que van por delante).",
+    label_situacion1: "Situación 1",
+    label_situacion2: "Situación 2",
+    label_situacion3: "Situación 3",
+    label_situacion4: "Situación 4",
+    opt_situacion_vacia: "— Ninguna —",
+    h2_busqueda_nombre: "Buscar por nombre",
+    label_buscar_nombre: "Apellidos, nombre o fragmento",
+    placeholder_buscar_nombre: "Escribe y pulsa Intro",
+    hint_buscar_nombre: "Busca dentro de la categoría seleccionada arriba.",
+    h3_resultado: "Resultado",
+    h4_candidatos_delante: "Candidatos por delante",
+    lbl_candidatos_delante: "Con esas situaciones",
+    hint_resultado: "Candidatos con número de puesto menor al tuyo que tienen CUALQUIERA de las situaciones marcadas.",
+    h4_resultados_nombre: "Resultados de la búsqueda por nombre",
+    sin_resultados: "Sin resultados. Prueba con otro fragmento del nombre.",
+    aviso_truncado: "Mostrando solo las primeras 50 coincidencias. Afina la búsqueda para ver menos resultados.",
+    error_nombre_vacio: "Introduce tu nombre.",
+    error_codigo_incorrecto: "Código de acceso incorrecto. Solícitalo a tu delegado/a sindical.",
+    no_encontrado: "— no encontrado —",
+    sin_puesto: "Escribe un número de puesto arriba.",
+    sin_datos_categoria: "Todavía no hay datos cargados para esta categoría. Vuelve a consultarlo tras la próxima actualización."
+  },
+  va: {
+    app_title_html: "Borsa de Treball<br>Sanitat GVA",
+    login_desc: "Accés exclusiu per a persones afiliades a Intersindical Salut. Si no tens codi d'accés, sol·licita'l al teu delegat/a sindical.",
+    label_nombre: "Nom",
+    label_codigo: "Codi d'accés",
+    placeholder_codigo: "Codi facilitat pel teu delegat/a",
+    btn_entrar: "Entra",
+    login_footnote: "Demana el teu codi al teu delegat/a sindical d'Intersindical Salut en el teu Departament de Salut.",
+    install_summary: "Com instal·lar esta app en el teu mòbil?",
+    install_android: '<strong>En Android (Chrome):</strong> toca el menú ⋮ de dalt a la dreta i tria "Instal·lar aplicació" o "Afegir a la pantalla d\'inici".',
+    install_ios: '<strong>En iPhone/iPad (Safari):</strong> toca la icona de compartir ↑ de baix i tria "Afegir a la pantalla d\'inici".',
+    install_note: "Una vegada instal·lada, et quedarà una icona com la de qualsevol altra app i la podràs utilitzar fins i tot sense connexió.",
+    session_label: "Sessió:",
+    logout_btn: "Canviar d'usuari",
+    contact_text: "Veus algun error o tens algun suggeriment? Escriu-nos",
+    brand_desc: "Consulta la teua posició en la borsa de treball, quants candidats actius tens per davant, i busca qualsevol persona pel nom.",
+    stamp_label: "▣ Dades actualitzades a:",
+    h2_buscador: "Cercador de posició",
+    label_categoria: "Categoria / borsa",
+    label_puesto_num: "Núm. de lloc",
+    hint_puesto_num: "Escriu el teu número de lloc en la borsa per a consultar-lo.",
+    label_candidato_info: "Este lloc correspon a",
+    fi_nombre: "Nom",
+    fi_situacion: "Situació",
+    fi_categoria: "Categoria",
+    fi_departamento: "Departament",
+    h2_situaciones: "Situacions a comptar",
+    hint_situaciones: "Tria fins a 4 situacions. Es comptaran els candidats amb QUALSEVOL d'elles que tinguen un número de lloc MENOR al teu (que van per davant).",
+    label_situacion1: "Situació 1",
+    label_situacion2: "Situació 2",
+    label_situacion3: "Situació 3",
+    label_situacion4: "Situació 4",
+    opt_situacion_vacia: "— Cap —",
+    h2_busqueda_nombre: "Buscar pel nom",
+    label_buscar_nombre: "Cognoms, nom o fragment",
+    placeholder_buscar_nombre: "Escriu i prem Intro",
+    hint_buscar_nombre: "Busca dins de la categoria seleccionada a dalt.",
+    h3_resultado: "Resultat",
+    h4_candidatos_delante: "Candidats per davant",
+    lbl_candidatos_delante: "Amb eixes situacions",
+    hint_resultado: "Candidats amb número de lloc menor al teu que tenen QUALSEVOL de les situacions marcades.",
+    h4_resultados_nombre: "Resultats de la busca pel nom",
+    sin_resultados: "Sense resultats. Prova amb un altre fragment del nom.",
+    aviso_truncado: "Mostrant només les primeres 50 coincidències. Afina la busca per a veure'n menys.",
+    error_nombre_vacio: "Introdueix el teu nom.",
+    error_codigo_incorrecto: "Codi d'accés incorrecte. Sol·licita'l al teu delegat/a sindical.",
+    no_encontrado: "— no trobat —",
+    sin_puesto: "Escriu un número de lloc a dalt.",
+    sin_datos_categoria: "Encara no hi ha dades carregades per a esta categoria. Torna a consultar-ho després de la pròxima actualització."
+  }
+};
+
+const CATEGORY_VA = {
+  "Bolsa": "Borsa general",
+  "Aux.Admin. O": "Auxiliar administratiu/iva · Orihuela",
+  "Aux.Admin. T": "Auxiliar administratiu/iva · Torrevieja",
+  "Celadora O": "Zelador/a · Orihuela",
+  "Celadora T": "Zelador/a · Torrevieja",
+  "TCAE O": "TCAI · Orihuela",
+  "TCAE T": "TCAI · Torrevieja",
+  "TEL O": "TEL · Orihuela",
+  "TEL T": "TEL · Torrevieja",
+  "TER O": "TER · Orihuela",
+  "TER T": "TER · Torrevieja"
+};
+
+function T(key){
+  return (I18N[LANG] && I18N[LANG][key]) || I18N.es[key] || key;
+}
+
+function tCategoria(id, label){
+  if(LANG === 'va' && CATEGORY_VA[id]) return CATEGORY_VA[id];
+  return label;
+}
+
+const HTML_KEYS = new Set(['app_title_html', 'install_android', 'install_ios']);
+
+function applyLanguage(lang){
+  LANG = (lang === 'va') ? 'va' : 'es';
+  localStorage.setItem(LANG_KEY, LANG);
+
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    const key = el.getAttribute('data-i18n');
+    const text = T(key);
+    if(HTML_KEYS.has(key)){
+      el.innerHTML = text;
+    } else {
+      el.textContent = text;
+    }
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+    el.setAttribute('placeholder', T(el.getAttribute('data-i18n-placeholder')));
+  });
+
+  document.querySelectorAll('.lang-btn').forEach(function(btn){
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === LANG);
+  });
+
+  if(document.getElementById('appRoot') && document.getElementById('appRoot').style.display !== 'none'){
+    populateCategorias();
+    populateSituaciones();
+    actualizar();
+    buscarPorNombre();
+  }
+  if(typeof BOLSA_DATA !== 'undefined' && document.getElementById('fechaActualizacion')){
+    document.getElementById('fechaActualizacion').textContent = formatFecha(BOLSA_DATA.generated);
+  }
+}
+
+document.addEventListener('click', function(e){
+  const btn = e.target.closest('.lang-btn');
+  if(btn) applyLanguage(btn.getAttribute('data-lang'));
+});
+
+// ==================== DATOS ====================
+const BOLSA_DATA = {"generated":"2026-09-09","situaciones":["ACTIVO","ACTIVO (DISPONIBLE ESPECIAL)","ACTIVO (No vacante)","ACTIVO (No vacante) (DISPONIBLE ESPECIAL)","ACTIVO EN PLAZA VACANTE","BLOQUEADO","BLOQUEADO (DISPONIBLE ESPECIAL)","DESACTIVADO","DESACTIVADO (NO LOCALIZABLE)","DESACTIVADO/A DE OFICIO","DISPONIBLE","NO DISPONIBLE OTROS","NO DISPONIBLE POR PENALIZACIÓN","NO DISPONIBLE PROVISIONAL","NO DISPONIBLE RENUNCIA JUSTIFICADA","NO LOCALIZABLE","RESERVADO","RESERVADO (DISPONIBLE ESPECIAL)"],"categories":[{"id":"Bolsa","label":"Bolsa general"},{"id":"Aux.Admin. O","label":"Auxiliar Administrativo/a · Orihuela"},{"id":"Aux.Admin. T","label":"Auxiliar Administrativo/a · Torrevieja"},{"id":"Celadora O","label":"Celador/a · Orihuela"},{"id":"Celadora T","label":"Celador/a · Torrevieja"},{"id":"TCAE O","label":"TCAE · Orihuela"},{"id":"TCAE T","label":"TCAE · Torrevieja"},{"id":"TEL O","label":"TEL · Orihuela"},{"id":"TEL T","label":"TEL · Torrevieja"},{"id":"TER O","label":"TER · Orihuela"},{"id":"TER T","label":"TER · Torrevieja"}],"candidates":{"Bolsa":[],"Aux.Admin. O":[],"Aux.Admin. T":[],"Celadora O":[],"Celadora T":[],"TCAE O":[],"TCAE T":[],"TEL O":[],"TEL T":[],"TER O":[],"TER T":[]}};
+
+// ==================== LÓGICA ====================
+const CAT_KEY = 'bolsa_ultima_categoria';
+const $ = id => document.getElementById(id);
+
+function formatFecha(iso){
+  try{
+    const d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString(LANG === 'va' ? 'ca-ES' : 'es-ES', {day:'numeric', month:'long', year:'numeric'});
+  }catch(e){ return iso; }
+}
+
+function normalize(str){
+  return String(str || '')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+}
+
+function populateCategorias(){
+  const sel = $('categoria');
+  const prev = sel.value;
+  sel.innerHTML = '';
+  BOLSA_DATA.categories.forEach(cat=>{
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    opt.textContent = tCategoria(cat.id, cat.label);
+    sel.appendChild(opt);
+  });
+  if(prev && BOLSA_DATA.categories.some(c=>c.id === prev)) sel.value = prev;
+}
+
+function populateSituaciones(){
+  ['sit1','sit2','sit3','sit4'].forEach(id=>{
+    const sel = $(id);
+    const prev = sel.value;
+    sel.innerHTML = '<option value="" data-i18n="opt_situacion_vacia">' + T('opt_situacion_vacia') + '</option>';
+    BOLSA_DATA.situaciones.forEach(sit=>{
+      const opt = document.createElement('option');
+      opt.value = sit; opt.textContent = sit;
+      sel.appendChild(opt);
+    });
+    if(prev) sel.value = prev;
+  });
+}
+
+function candidatosDeCategoria(){
+  const catId = $('categoria').value;
+  return BOLSA_DATA.candidates[catId] || [];
+}
+
+function actualizar(){
+  const rows = candidatosDeCategoria();
+  const catId = $('categoria').value;
+  const catObj = BOLSA_DATA.categories.find(c=>c.id === catId);
+  $('categoriaLabel').textContent = catObj ? tCategoria(catObj.id, catObj.label) : '—';
+  $('sinDatosCategoria').style.display = (rows.length === 0) ? 'block' : 'none';
+
+  const puestoVal = $('puestoBuscado').value;
+  const puesto = puestoVal === '' ? null : parseInt(puestoVal, 10);
+
+  // Candidato encontrado para ese puesto
+  if(puesto === null || isNaN(puesto)){
+    $('fiNombre').textContent = '—';
+    $('fiSituacion').textContent = '—';
+    $('fiCategoria').textContent = '—';
+    $('fiDepartamento').textContent = '—';
+  }else{
+    const found = rows.find(r => r[0] === puesto);
+    if(found){
+      $('fiNombre').textContent = found[1] || '—';
+      $('fiSituacion').textContent = found[2] || '—';
+      $('fiCategoria').textContent = found[3] || '—';
+      $('fiDepartamento').textContent = found[4] || '—';
+    }else{
+      $('fiNombre').textContent = T('no_encontrado');
+      $('fiSituacion').textContent = '—';
+      $('fiCategoria').textContent = '—';
+      $('fiDepartamento').textContent = '—';
+    }
+  }
+
+  // Candidatos por delante
+  const situaciones = ['sit1','sit2','sit3','sit4'].map(id => $(id).value).filter(v => v !== '');
+  let count = '—';
+  if(puesto !== null && !isNaN(puesto) && situaciones.length > 0){
+    count = rows.filter(r => r[0] < puesto && situaciones.indexOf(r[2]) !== -1).length;
+  }else if(puesto !== null && !isNaN(puesto)){
+    count = 0;
+  }
+  $('candidatosPorDelante').textContent = count;
+  $('mobileCandidatosVal').textContent = count;
+
+  saveCategoriaState();
+}
+
+function buscarPorNombre(){
+  const q = normalize($('buscarNombre').value.trim());
+  const ul = $('resultadosBusqueda');
+  const sinResultados = $('sinResultados');
+  const avisoTruncado = $('avisoTruncado');
+  ul.innerHTML = '';
+
+  if(q === ''){
+    sinResultados.style.display = 'none';
+    avisoTruncado.style.display = 'none';
+    return;
+  }
+
+  const rows = candidatosDeCategoria();
+  const matches = rows.filter(r => normalize(r[1]).indexOf(q) !== -1);
+
+  if(matches.length === 0){
+    sinResultados.style.display = 'block';
+    avisoTruncado.style.display = 'none';
+    return;
+  }
+  sinResultados.style.display = 'none';
+
+  const shown = matches.slice(0, 50);
+  shown.forEach(r=>{
+    const li = document.createElement('li');
+    li.innerHTML = '<span>#' + r[0] + ' — ' + r[1] + '</span><span>' + r[2] + '</span>';
+    ul.appendChild(li);
+  });
+  avisoTruncado.style.display = matches.length > 50 ? 'block' : 'none';
+}
+
+function saveCategoriaState(){
+  try{ localStorage.setItem(CAT_KEY, $('categoria').value); }catch(e){}
+}
+
+function restoreCategoriaState(){
+  try{
+    const saved = localStorage.getItem(CAT_KEY);
+    if(saved && BOLSA_DATA.candidates[saved] !== undefined) $('categoria').value = saved;
+  }catch(e){}
+}
+
+populateCategorias();
+restoreCategoriaState();
+populateSituaciones();
+$('fechaActualizacion').textContent = formatFecha(BOLSA_DATA.generated);
+
+$('categoria').addEventListener('change', function(){ actualizar(); buscarPorNombre(); });
+$('puestoBuscado').addEventListener('input', actualizar);
+['sit1','sit2','sit3','sit4'].forEach(id => $(id).addEventListener('change', actualizar));
+$('buscarNombre').addEventListener('input', buscarPorNombre);
+$('buscarNombre').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); buscarPorNombre(); } });
+
+actualizar();
+applyLanguage(LANG);
+</script>
+
+
+<script>
+(function(){
+  var CODE = "IntersindicalSalut";
+  var AUTH_KEY = "intersindical_nomina_auth";
+
+  function showApp(nombre){
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('appRoot').style.display = 'block';
+    document.getElementById('userNombre').textContent = nombre || '';
+  }
+
+  function getAuth(){
+    try{
+      var raw = localStorage.getItem(AUTH_KEY);
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var nombre = document.getElementById('loginNombre').value.trim();
+    var codigo = document.getElementById('loginCodigo').value;
+    var errorEl = document.getElementById('loginError');
+
+    if(!nombre){
+      errorEl.textContent = T('error_nombre_vacio');
+      errorEl.style.display = 'block';
+      return;
+    }
+    if(codigo !== CODE){
+      errorEl.textContent = T('error_codigo_incorrecto');
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+    localStorage.setItem(AUTH_KEY, JSON.stringify({nombre: nombre, ts: Date.now()}));
+    showApp(nombre);
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    localStorage.removeItem(AUTH_KEY);
+    location.reload();
+  });
+
+  var saved = getAuth();
+  if(saved && saved.nombre){
+    showApp(saved.nombre);
+  }
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('sw.js').catch(function(){ /* sin service worker, la app sigue funcionando igual */ });
+  });
+}
+</script>
+</body>
+</html>

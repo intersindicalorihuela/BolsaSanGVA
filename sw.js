@@ -5,7 +5,7 @@
 const CACHE_NAME = 'bolsa-intersindical-v1';
 const ASSETS = [
   './',
-  './Bolsa_SanGVA.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

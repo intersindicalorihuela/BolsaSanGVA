@@ -2,7 +2,7 @@
   "name": "Bolsa de Trabajo - Intersindical Salut",
   "short_name": "Bolsa GVA",
   "description": "Consulta tu posición en la bolsa de trabajo de Sanidad GVA - Intersindical Salut Orihuela",
-  "start_url": "./Bolsa_SanGVA.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
