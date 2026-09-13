@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generador de datos · Bolsa GVA</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  :root{
+    --ink:#1D1B1A; --ink-soft:#5C544F; --paper:#F6F2EC; --card:#FFFDF9;
+    --red:#BB2B09; --red-deep:#8A2007; --red-tint:#FBEAE4; --red-tint-border:#F0C4B6;
+    --green:#2F6B4F; --line:#E3D9CF; --shadow:0 1px 2px rgba(29,27,26,.06),0 8px 24px rgba(29,27,26,.08);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;}
+  .wrap{max-width:780px;margin:0 auto;padding:2.4rem 1.4rem 5rem;}
+  h1{font-family:'Source Serif 4',serif;font-size:1.7rem;margin:0 0 0.3rem;}
+  .lead{color:var(--ink-soft);font-size:0.92rem;line-height:1.55;margin:0 0 1.4rem;}
+  .warn{
+    background:var(--red-tint);border:1px solid var(--red-tint-border);border-radius:8px;
+    padding:0.9rem 1.1rem;font-size:0.85rem;line-height:1.55;color:var(--red-deep);margin-bottom:1.8rem;
+  }
+  .warn b{display:block;margin-bottom:0.3rem;font-family:'IBM Plex Mono',monospace;font-size:0.72rem;letter-spacing:.06em;text-transform:uppercase;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1.3rem 1.4rem 1.5rem;box-shadow:var(--shadow);margin-bottom:1.4rem;}
+  .card h2{font-family:'Source Serif 4',serif;font-size:1.05rem;margin:0 0 0.9rem;display:flex;align-items:center;gap:0.5rem;}
+  .step-num{
+    display:inline-flex;align-items:center;justify-content:center;width:1.5rem;height:1.5rem;
+    border-radius:50%;background:var(--red);color:#fff;font-size:0.78rem;font-family:'IBM Plex Mono',monospace;flex-shrink:0;
+  }
+  .field{margin-bottom:0.9rem;}
+  .field label{display:block;font-size:0.76rem;font-weight:600;color:var(--ink-soft);margin-bottom:0.35rem;text-transform:uppercase;letter-spacing:.02em;}
+  input[type=file], input[type=date], input[type=text]{
+    width:100%;font-family:'Inter',sans-serif;font-size:0.88rem;padding:0.5rem 0.6rem;
+    border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);
+  }
+  .hint{font-size:0.76rem;color:#7C8B85;margin-top:0.3rem;}
+  button{
+    font-family:'Inter',sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;
+    background:var(--red);color:#fff;border:none;border-radius:7px;padding:0.75rem 1.2rem;
+  }
+  button:disabled{background:#C9C0B6;cursor:not-allowed;}
+  button.secondary{background:#fff;color:var(--red-deep);border:1px solid var(--red);}
+  .actions{display:flex;gap:0.7rem;flex-wrap:wrap;margin-top:0.4rem;}
+  #resumen, #alias{display:none;}
+  table.summary{width:100%;border-collapse:collapse;font-size:0.85rem;margin-top:0.8rem;}
+  table.summary th, table.summary td{text-align:left;padding:0.4rem 0.5rem;border-bottom:1px solid var(--line);}
+  table.summary td.n{font-family:'IBM Plex Mono',monospace;text-align:right;}
+  table.summary td.ignorada{color:#B0A79D;font-style:italic;}
+  .alias-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.5rem;align-items:end;margin-bottom:0.6rem;}
+  .alias-row .sheetname{font-size:0.82rem;font-weight:600;padding-bottom:0.5rem;font-family:'IBM Plex Mono',monospace;}
+  .alias-row input{font-size:0.82rem;padding:0.4rem 0.5rem;}
+  .alias-head{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.5rem;font-size:0.68rem;text-transform:uppercase;color:var(--ink-soft);margin-bottom:0.4rem;letter-spacing:.03em;}
+  #log{font-family:'IBM Plex Mono',monospace;font-size:0.78rem;white-space:pre-wrap;background:#241411;color:#DCC3B9;padding:0.9rem 1rem;border-radius:8px;margin-top:1rem;display:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Generador de datos — Bolsa GVA</h1>
+  <p class="lead">Sube la plantilla HTML de la app y el Excel; la herramienta detecta automáticamente todas las hojas del Excel que tengan datos y las convierte en bolsas de la app. Te devuelve el HTML actualizado, listo para sustituir el que usan tus compañeros.</p>
+
+  <div class="warn">
+    <b>Cómo funciona la detección</b>
+    Cada hoja del Excel con columnas "Puesto" y "Nombre" reconocibles se convierte en una bolsa independiente, con su propia numeración. Las hojas vacías o sin esas columnas se ignoran automáticamente — no hace falta que las borres.
+  </div>
+
+  <div class="card">
+    <h2><span class="step-num">1</span>Plantilla HTML de la app</h2>
+    <div class="field">
+      <label for="fileHtml">Archivo (el index.html actual)</label>
+      <input type="file" id="fileHtml" accept=".html">
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="step-num">2</span>Excel de datos</h2>
+    <div class="field">
+      <label for="fileXls">Archivo (.xls o .xlsx)</label>
+      <input type="file" id="fileXls" accept=".xls,.xlsx">
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="btnLeer">Leer hojas del Excel</button>
+  </div>
+
+  <div id="alias" class="card">
+    <h2><span class="step-num">3</span>Nombre de cada bolsa</h2>
+    <p class="hint" style="margin-top:-0.4rem;margin-bottom:1rem;">Ajusta cómo se llamará cada bolsa en la app (se recuerda para la próxima vez). Deja el ID sin espacios raros; el resto puede ser cualquier texto.</p>
+    <div class="alias-head"><div>Hoja del Excel</div><div>ID interno</div><div>Nombre (ES)</div><div>Nombre (VA)</div></div>
+    <div id="aliasRows"></div>
+    <div class="actions">
+      <button id="btnGenerar">Generar HTML actualizado</button>
+    </div>
+  </div>
+
+  <div id="resumen" class="card">
+    <h2>Resultado</h2>
+    <table class="summary" id="tablaResumen"></table>
+    <div class="actions">
+      <button id="btnDescargar">Descargar HTML actualizado</button>
+      <button class="secondary" id="btnLog">Ver detalle técnico</button>
+    </div>
+    <div id="log"></div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'bolsa_gva_alias_v2';
+const $ = id => document.getElementById(id);
+
+const DEFAULT_ALIASES = {
+  'TCAE O':     { id: 'TCAE O',       label: 'TCAE · Orihuela',                       label_va: 'TCAI · Orihuela' },
+  'TCAE T':     { id: 'TCAE T',       label: 'TCAE · Torrevieja',                     label_va: 'TCAI · Torrevieja' },
+  'Celador O':  { id: 'Celadora O',   label: 'Celador/a · Orihuela',                  label_va: 'Zelador/a · Orihuela' },
+  'Celador T':  { id: 'Celadora T',   label: 'Celador/a · Torrevieja',                label_va: 'Zelador/a · Torrevieja' },
+  'AuxAdmin O': { id: 'Aux.Admin. O', label: 'Auxiliar Administrativo/a · Orihuela',  label_va: 'Auxiliar administratiu/iva · Orihuela' },
+  'AuxAdmin T': { id: 'Aux.Admin. T', label: 'Auxiliar Administrativo/a · Torrevieja',label_va: 'Auxiliar administratiu/iva · Torrevieja' }
+};
+
+const BASE_SITUACIONES = ["ACTIVO","ACTIVO (DISPONIBLE ESPECIAL)","ACTIVO (No vacante)","ACTIVO (No vacante) (DISPONIBLE ESPECIAL)","ACTIVO EN PLAZA VACANTE","BLOQUEADO","BLOQUEADO (DISPONIBLE ESPECIAL)","DESACTIVADO","DESACTIVADO (NO LOCALIZABLE)","DESACTIVADO/A DE OFICIO","DISPONIBLE","NO DISPONIBLE OTROS","NO DISPONIBLE POR PENALIZACIÓN","NO DISPONIBLE PROVISIONAL","NO DISPONIBLE RENUNCIA JUSTIFICADA","NO LOCALIZABLE","RESERVADO","RESERVADO (DISPONIBLE ESPECIAL)"];
+
+function loadSavedAliases(){
+  try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }catch(e){ return {}; }
+}
+function saveAliases(map){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(map)); }catch(e){}
+}
+
+function normalizeHeader(str){
+  return String(str||'').toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+}
+
+function findColumnIndexes(headerRow){
+  const norm = headerRow.map(normalizeHeader);
+  const find = needle => norm.findIndex(h => h.includes(needle));
+  return {
+    puesto: find('PUESTO'), nombre: find('NOMBRE'), situacion: find('SITUACION'),
+    categoria: find('CATEGORIA'), departamento: find('DEPARTAMENTO')
+  };
+}
+
+function parseSheet(sheet){
+  const rows = XLSX.utils.sheet_to_json(sheet, {header:1, defval:''});
+  if(rows.length < 2) return [];
+  const idx = findColumnIndexes(rows[0]);
+  if(idx.puesto === -1 || idx.nombre === -1) return [];
+  const out = [];
+  for(let i=1; i<rows.length; i++){
+    const r = rows[i];
+    if(!r || r.length === 0) continue;
+    const puesto = parseInt(r[idx.puesto], 10);
+    if(isNaN(puesto)) continue;
+    const nombre = String(r[idx.nombre]||'').trim();
+    const situacion = idx.situacion>-1 ? String(r[idx.situacion]||'').trim() : '';
+    let categoria = idx.categoria>-1 ? String(r[idx.categoria]||'').trim() : '';
+    let departamento = idx.departamento>-1 ? String(r[idx.departamento]||'').trim() : '';
+    if(/^categor/i.test(categoria)) categoria = '';
+    if(/^departamento/i.test(departamento)) departamento = '';
+    out.push([puesto, nombre, situacion, categoria, departamento]);
+  }
+  return out;
+}
+
+function readFileAsArrayBuffer(file){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=> res(r.result);
+    r.onerror = ()=> rej(new Error('No se pudo leer el archivo'));
+    r.readAsArrayBuffer(file);
+  });
+}
+function readFileAsText(file){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=> res(r.result);
+    r.onerror = ()=> rej(new Error('No se pudo leer el archivo'));
+    r.readAsText(file, 'UTF-8');
+  });
+}
+
+// BOLSA_DATA se guarda como const BOLSA_DATA = JSON.parse('...'); en vez de un
+// objeto literal directo: es mucho más ligero de analizar para el motor JS
+// con datasets grandes (evita cuelgues/errores en Safari/iOS).
+function escapeForSingleQuotedJs(jsonString){
+  return jsonString.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+function injectData(templateHtml, newData){
+  const marker = "const BOLSA_DATA = JSON.parse('";
+  const markerIdx = templateHtml.indexOf(marker);
+  if(markerIdx === -1) throw new Error('No se encontró el marcador BOLSA_DATA en la plantilla. ¿Es el archivo correcto?');
+  const start = markerIdx + marker.length;
+  let i = start, esc = false;
+  for(; i < templateHtml.length; i++){
+    const c = templateHtml[i];
+    if(esc){ esc = false; continue; }
+    if(c === '\\'){ esc = true; continue; }
+    if(c === "'") break;
+  }
+  if(i >= templateHtml.length) throw new Error('No se encontró el cierre de BOLSA_DATA en la plantilla.');
+  const escaped = escapeForSingleQuotedJs(JSON.stringify(newData));
+  return templateHtml.slice(0, start) + escaped + templateHtml.slice(i);
+}
+
+let parsedSheets = null; // { sheetName: rows[] } solo las que tienen datos
+let ignoredSheets = [];
+
+$('btnLeer').addEventListener('click', async ()=>{
+  try{
+    const xlsFile = $('fileXls').files[0];
+    if(!xlsFile){ alert('Falta el archivo Excel.'); return; }
+
+    const buffer = await readFileAsArrayBuffer(xlsFile);
+    const wb = XLSX.read(buffer, {type:'array'});
+
+    parsedSheets = {};
+    ignoredSheets = [];
+    wb.SheetNames.forEach(name=>{
+      const rows = parseSheet(wb.Sheets[name]);
+      if(rows.length > 0) parsedSheets[name] = rows;
+      else ignoredSheets.push(name);
+    });
+
+    const names = Object.keys(parsedSheets);
+    if(names.length === 0){
+      alert('Ninguna hoja tiene columnas reconocibles (Puesto/Nombre). Revisa el archivo.');
+      return;
+    }
+
+    const saved = loadSavedAliases();
+    const box = $('aliasRows');
+    box.innerHTML = '';
+    names.forEach(name=>{
+      const def = saved[name] || DEFAULT_ALIASES[name] || {id:name, label:name, label_va:name};
+      const row = document.createElement('div');
+      row.className = 'alias-row';
+      row.innerHTML =
+        '<div class="sheetname">'+name+' <span style="color:#7C8B85;font-weight:400;">('+parsedSheets[name].length+')</span></div>'+
+        '<input type="text" data-sheet="'+name+'" data-field="id" value="'+def.id.replace(/"/g,'&quot;')+'">'+
+        '<input type="text" data-sheet="'+name+'" data-field="label" value="'+def.label.replace(/"/g,'&quot;')+'">'+
+        '<input type="text" data-sheet="'+name+'" data-field="label_va" value="'+(def.label_va||def.label).replace(/"/g,'&quot;')+'">';
+      box.appendChild(row);
+    });
+
+    $('alias').style.display = 'block';
+    $('alias').scrollIntoView({behavior:'smooth', block:'start'});
+  }catch(err){
+    alert('Error: ' + err.message);
+    console.error(err);
+  }
+});
+
+function currentAliases(){
+  const map = {};
+  document.querySelectorAll('#aliasRows input').forEach(inp=>{
+    const sheet = inp.getAttribute('data-sheet');
+    const field = inp.getAttribute('data-field');
+    if(!map[sheet]) map[sheet] = {};
+    map[sheet][field] = inp.value.trim();
+  });
+  return map;
+}
+
+let lastResult = null;
+
+$('btnGenerar').addEventListener('click', async ()=>{
+  const logEl = $('log');
+  logEl.style.display = 'none';
+  logEl.textContent = '';
+  try{
+    const htmlFile = $('fileHtml').files[0];
+    if(!htmlFile){ alert('Falta la plantilla HTML.'); return; }
+    if(!parsedSheets){ alert('Primero pulsa "Leer hojas del Excel".'); return; }
+
+    const aliases = currentAliases();
+    saveAliases(aliases);
+
+    const templateHtml = await readFileAsText(htmlFile);
+
+    const categories = [];
+    const candidates = {};
+    const allRows = [];
+    Object.keys(parsedSheets).forEach(sheetName=>{
+      const a = aliases[sheetName] || {id:sheetName, label:sheetName, label_va:sheetName};
+      const cat = {id: a.id || sheetName, label: a.label || sheetName, label_va: a.label_va || a.label || sheetName};
+      categories.push(cat);
+      candidates[cat.id] = parsedSheets[sheetName];
+      allRows.push(...parsedSheets[sheetName]);
+    });
+
+    const situSet = new Set(BASE_SITUACIONES);
+    allRows.forEach(r=>{ if(r[2]) situSet.add(r[2]); });
+    const situaciones = Array.from(situSet).sort((a,b)=>a.localeCompare(b,'es'));
+
+    const newData = {
+      generated: new Date().toISOString().slice(0,10),
+      situaciones, categories, candidates
+    };
+
+    const outputHtml = injectData(templateHtml, newData);
+    lastResult = {outputHtml, candidates, categories, ignoredSheets};
+
+    const tbl = $('tablaResumen');
+    let rowsHtml = '<tr><th>Bolsa</th><th style="text-align:right">Candidatos</th></tr>';
+    categories.forEach(c=>{
+      rowsHtml += '<tr><td>'+c.label+'</td><td class="n">'+candidates[c.id].length+'</td></tr>';
+    });
+    ignoredSheets.forEach(name=>{
+      rowsHtml += '<tr><td class="ignorada">'+name+' (ignorada, sin datos/columnas)</td><td class="n ignorada">—</td></tr>';
+    });
+    tbl.innerHTML = rowsHtml;
+
+    $('resumen').style.display = 'block';
+    $('resumen').scrollIntoView({behavior:'smooth', block:'start'});
+  }catch(err){
+    alert('Error: ' + err.message);
+    console.error(err);
+  }
+});
+
+$('btnLog').addEventListener('click', ()=>{
+  if(!lastResult) return;
+  const logEl = $('log');
+  const lines = [];
+  lastResult.categories.forEach(c=> lines.push(c.id + ' ("' + c.label + '"): ' + lastResult.candidates[c.id].length + ' candidatos'));
+  if(lastResult.ignoredSheets.length) lines.push('Ignoradas: ' + lastResult.ignoredSheets.join(', '));
+  logEl.textContent = lines.join('\n');
+  logEl.style.display = logEl.style.display === 'none' ? 'block' : 'none';
+});
+
+$('btnDescargar').addEventListener('click', ()=>{
+  if(!lastResult) return;
+  const blob = new Blob([lastResult.outputHtml], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'index.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
