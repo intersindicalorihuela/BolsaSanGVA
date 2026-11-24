@@ -522,6 +522,10 @@
   .actions-buttons{ display:flex; gap:0.7rem; flex-wrap:wrap; }
   .actions-hint{ color:#C9A99C; margin-top:0.6rem; font-size:0.74rem; line-height:1.4; }
 
+  /* --- COMPARTIR RESULTADO --- */
+  .btn-primary:disabled,.btn-secondary:disabled{ opacity:0.45; cursor:not-allowed; }
+  .compartir-box{ margin-top:1.1rem; padding-top:1rem; border-top:1px solid #47231C; }
+  .compartir-msg{ color:#F2D3C6; font-size:0.78rem; line-height:1.4; margin-top:0.6rem; }
 </style>
 </head>
 <body>
@@ -691,6 +695,14 @@
       </ul>
       <div class="grand-total"><span class="lbl" data-i18n="lbl_candidatos_delante">Con esas situaciones</span><span class="val" id="candidatosPorDelante">&mdash;</span></div>
       <div class="actions-hint" data-i18n="hint_resultado">Candidatos con n&uacute;mero de puesto menor al tuyo que tienen CUALQUIERA de las situaciones marcadas.</div>
+      <div class="compartir-box">
+        <div class="actions-buttons">
+          <button type="button" id="btnCompartir" class="btn-primary" data-i18n="btn_compartir" disabled>Compartir resultado</button>
+          <button type="button" id="btnDescargar" class="btn-secondary" data-i18n="btn_descargar" disabled>Descargar imagen</button>
+        </div>
+        <div class="actions-hint" id="compartirHint" data-i18n="compartir_hint">Escribe un n&uacute;mero de puesto v&aacute;lido para poder compartir el resultado.</div>
+        <div class="compartir-msg" id="compartirMsg" role="status" aria-live="polite"></div>
+      </div>
     </div>
 
     <div class="section">
@@ -788,7 +800,20 @@ const I18N = {
     error_codigo_incorrecto: "Código de acceso incorrecto. Solícitalo a tu delegado/a sindical.",
     no_encontrado: "— no encontrado —",
     sin_puesto: "Escribe un número de puesto arriba.",
-    sin_datos_categoria: "Todavía no hay datos cargados para esta categoría. Vuelve a consultarlo tras la próxima actualización."
+    sin_datos_categoria: "Todavía no hay datos cargados para esta categoría. Vuelve a consultarlo tras la próxima actualización.",
+    btn_compartir: "Compartir resultado",
+    btn_descargar: "Descargar imagen",
+    compartir_hint: "Escribe un número de puesto válido para poder compartir el resultado.",
+    share_descargada: "Tu navegador no permite compartir directamente. Se ha descargado la imagen: envíala por WhatsApp u otra app desde tu galería.",
+    share_error: "No se ha podido generar la imagen. Inténtalo de nuevo.",
+    share_cta: "Consulta tu posición en la bolsa:",
+    card_header: "INTERSINDICAL SALUT Orihuela · BOLSA Sanidad GVA",
+    card_puesto: "Puesto",
+    card_segun: "Según las situaciones marcadas",
+    card_sin_situaciones: "Sin situaciones marcadas",
+    card_footer_a: "Bolsa de trabajo a",
+    card_footer_no_oficial: "Resultado orientativo no oficial",
+    card_footer_de: "de"
   },
   va: {
     app_title_html: "Borsa de Treball<br>Sanitat GVA",
@@ -855,7 +880,20 @@ const I18N = {
     error_codigo_incorrecto: "Codi d'accés incorrecte. Sol·licita'l al teu delegat/a sindical.",
     no_encontrado: "— no trobat —",
     sin_puesto: "Escriu un número de lloc a dalt.",
-    sin_datos_categoria: "Encara no hi ha dades carregades per a esta categoria. Torna a consultar-ho després de la pròxima actualització."
+    sin_datos_categoria: "Encara no hi ha dades carregades per a esta categoria. Torna a consultar-ho després de la pròxima actualització.",
+    btn_compartir: "Compartir resultat",
+    btn_descargar: "Descarrega la imatge",
+    compartir_hint: "Escriu un número de lloc vàlid per a poder compartir el resultat.",
+    share_descargada: "El teu navegador no permet compartir directament. S'ha descarregat la imatge: envia-la per WhatsApp o una altra app des de la galeria.",
+    share_error: "No s'ha pogut generar la imatge. Torna-ho a provar.",
+    share_cta: "Consulta la teua posició en la borsa:",
+    card_header: "INTERSINDICAL SALUT Orihuela · BORSA Sanitat GVA",
+    card_puesto: "Lloc",
+    card_segun: "Segons les situacions marcades",
+    card_sin_situaciones: "Sense situacions marcades",
+    card_footer_a: "Borsa de treball a",
+    card_footer_no_oficial: "Resultat orientatiu no oficial",
+    card_footer_de: "de"
   }
 };
 
@@ -1177,6 +1215,7 @@ function actualizar(){
   $('resumenFiltros').textContent = situaciones.length > 0 ? situaciones.join(', ') : T('resumen_sin_filtros');
 
   saveCategoriaState();
+  actualizarCompartir();
 }
 
 function buscarPorNombre(){
@@ -1236,6 +1275,246 @@ function restoreCategoriaState(){
   if(saved && BOLSA_DATA.candidates[saved] !== undefined){ $('categoria').value = saved; poblarSelectores(saved); }
 }
 
+// ==================== COMPARTIR RESULTADO (imagen para WhatsApp, etc.) ====================
+// Genera una tarjeta PNG con el resultado de la consulta y la comparte con el menú nativo del
+// móvil (WhatsApp, Telegram, correo...). Si el navegador no puede compartir archivos, la descarga.
+const APP_URL = 'https://intersindicalorihuela.github.io/BolsaSanGVA/';
+const FUENTE_TARJETA = '"Inter","Roboto","Helvetica Neue",Arial,sans-serif';
+let tarjetaBlob = null, tarjetaFirma = '', tarjetaTimer = null;
+
+function mayus(txt){ return String(txt || '').toLocaleUpperCase(LANG === 'va' ? 'ca' : 'es'); }
+
+// Los nombres de categoría vienen en MAYÚSCULAS; en la tarjeta se muestran como "Administrativo/a" (siglas intactas).
+const SIGLAS_TARJETA = ['TCAE','TCAI','TSID','TEL','TER','TE'];
+function fraseTarjeta(txt){
+  txt = String(txt || '');
+  if(txt !== txt.toLocaleUpperCase()) return txt;
+  const pal = txt.split(' ').map(function(w){ return SIGLAS_TARJETA.indexOf(w) !== -1 ? w : w.toLocaleLowerCase(); });
+  const i = pal.findIndex(function(w){ return SIGLAS_TARJETA.indexOf(w) === -1 && w !== ''; });
+  if(i !== -1) pal[i] = pal[i].charAt(0).toLocaleUpperCase() + pal[i].slice(1);
+  return pal.join(' ');
+}
+
+function datosTarjeta(){
+  const puestoVal = $('puestoBuscado').value;
+  const puesto = puestoVal === '' ? null : parseInt(puestoVal, 10);
+  if(puesto === null || isNaN(puesto)) return null;
+  const found = candidatosDeCategoria().find(r => r[0] === puesto);
+  if(!found) return null;
+  const info = catInfos().find(i => i.id === $('categoria').value);
+  if(!info) return null;
+  const pf = perfilSeleccionado();
+  const perfil = pf === '' ? '' : (pf === '__none' ? T('opt_perfil_sin') : tPerfil(pf));
+  return {
+    lang: LANG,
+    nombre: found[1] || '—',
+    categoria: fraseTarjeta(LANG === 'va' ? info.nombre_va : info.nombre) + ' · ' + nombreTurno(info.turno),
+    departamento: (info.depto || '').toUpperCase(),
+    puesto: String(puesto),
+    perfil: perfil,
+    delante: $('candidatosPorDelante').textContent,
+    situaciones: ['sit1','sit2','sit3','sit4'].map(id => $(id).value).filter(v => v !== ''),
+    fecha: formatFecha(BOLSA_DATA.generated)
+  };
+}
+
+function ajustarTexto(c, texto, peso, tam, min, ancho){
+  let s = tam;
+  c.font = peso + ' ' + s + 'px ' + FUENTE_TARJETA;
+  while(s > min && c.measureText(texto).width > ancho){
+    s--;
+    c.font = peso + ' ' + s + 'px ' + FUENTE_TARJETA;
+  }
+  return s;
+}
+
+function partirLineas(c, texto, ancho){
+  const lineas = [];
+  let actual = '';
+  String(texto).split(' ').forEach(function(p){
+    const prueba = actual ? actual + ' ' + p : p;
+    if(actual && c.measureText(prueba).width > ancho){ lineas.push(actual); actual = p; }
+    else actual = prueba;
+  });
+  if(actual) lineas.push(actual);
+  return lineas;
+}
+
+async function dibujarTarjeta(d){
+  try{
+    if(document.fonts && document.fonts.load){
+      await Promise.all(['400','500','600','700'].map(function(w){ return document.fonts.load(w + ' 30px Inter'); }));
+    }
+  }catch(e){}
+
+  const W = 1080;
+  const ROJO = '#BB2B09', ROJO_OSC = '#8A2007', TINTA = '#1D1B1A', SUAVE = '#5C544F', ETIQ = '#8C8278';
+
+  // Medimos antes de dibujar: el recuadro derecho crece si hay muchas situaciones.
+  const medir = document.createElement('canvas').getContext('2d');
+  medir.font = '400 17px ' + FUENTE_TARJETA;
+  const textoSit = d.situaciones.length ? d.situaciones.join(' + ') : T('card_sin_situaciones');
+  const lineasSit = partirLineas(medir, textoSit, 360);
+  const sitY0 = 398, interlineado = 24;
+  const cajaFin = Math.max(528, sitY0 + (lineasSit.length - 1) * interlineado + 34);
+  const H = Math.max(680, cajaFin + 104);
+
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const c = cv.getContext('2d');
+  c.textBaseline = 'alphabetic';
+
+  // Fondo y cabecera
+  c.fillStyle = '#FFFDF9'; c.fillRect(0, 0, W, H);
+  c.fillStyle = ROJO; c.fillRect(0, 0, W, 86);
+  const cab = T('card_header');
+  ajustarTexto(c, cab, '700', 28, 16, W - 72);
+  c.fillStyle = '#FFFFFF'; c.textBaseline = 'middle'; c.fillText(cab, 36, 45); c.textBaseline = 'alphabetic';
+
+  // Logo
+  c.fillStyle = '#FFFFFF'; c.fillRect(40, 108, 120, 120);
+  const logo = document.querySelector('.brand img.logo');
+  if(logo && logo.complete && logo.naturalWidth){
+    const k = Math.min(112 / logo.naturalWidth, 112 / logo.naturalHeight);
+    const w = logo.naturalWidth * k, h = logo.naturalHeight * k;
+    c.drawImage(logo, 40 + (120 - w) / 2, 108 + (120 - h) / 2, w, h);
+  }
+
+  // Columna izquierda: nombre, categoría, departamento, puesto (+ perfil)
+  function campo(etiqueta, valor, yEtiq, tamValor, x, ancho, minimo){
+    c.font = '600 21px ' + FUENTE_TARJETA;
+    c.fillStyle = ETIQ; c.fillText(mayus(etiqueta), x, yEtiq);
+    ajustarTexto(c, valor, '700', tamValor, minimo || 18, ancho);
+    c.fillStyle = TINTA;
+    if(c.measureText(valor).width <= ancho){ c.fillText(valor, x, yEtiq + 39); return; }
+    // Aún no cabe (nombres larguísimos): se parte en dos líneas.
+    let tam = 28, lineas;
+    do{
+      c.font = '700 ' + tam + 'px ' + FUENTE_TARJETA;
+      lineas = partirLineas(c, valor, ancho);
+      tam -= 2;
+    }while(lineas.length > 2 && tam >= 20);
+    lineas.slice(0, 2).forEach(function(l, i){ c.fillText(l, x, yEtiq + 31 + i * 31); });
+  }
+  campo(T('fi_nombre'), d.nombre, 262, 36, 40, 560, 28);
+  campo(T('fi_categoria'), d.categoria, 353, 34, 40, 560);
+  campo(T('fi_departamento'), d.departamento || '—', 445, 36, 40, 560);
+  campo(T('card_puesto'), d.puesto, 537, 34, 40, d.perfil ? 190 : 560);
+  if(d.perfil) campo(T('label_perfil'), d.perfil, 537, 30, 250, 350);
+
+  // Recuadro derecho
+  c.fillStyle = '#FBEAE4'; c.fillRect(620, 108, 420, cajaFin - 108);
+  c.fillStyle = ROJO_OSC;
+  const titulo = mayus(T('h4_candidatos_delante'));
+  ajustarTexto(c, titulo, '600', 23, 14, 360); c.fillText(titulo, 650, 172);
+  ajustarTexto(c, d.delante, '700', 124, 60, 360); c.fillText(d.delante, 650, 313);
+  const segun = mayus(T('card_segun'));
+  ajustarTexto(c, segun, '700', 19, 12, 360); c.fillText(segun, 650, 368);
+  c.font = '400 17px ' + FUENTE_TARJETA; c.fillStyle = SUAVE;
+  lineasSit.forEach(function(l, i){ c.fillText(l, 650, sitY0 + i * interlineado); });
+
+  // Pie
+  c.fillStyle = '#F6F2EC'; c.fillRect(0, H - 48, W, 48);
+  const partes = [
+    ['normal', '400', T('card_footer_a') + ' ' + d.fecha + ' · '],
+    ['italic', '400', T('card_footer_no_oficial')],
+    ['normal', '400', ' ' + T('card_footer_de') + ' '],
+    ['normal', '700', 'Intersindical Salut Orihuela.']
+  ];
+  let tam = 15;
+  function anchoPie(){
+    return partes.reduce(function(a, p){ c.font = p[0] + ' ' + p[1] + ' ' + tam + 'px ' + FUENTE_TARJETA; return a + c.measureText(p[2]).width; }, 0);
+  }
+  while(tam > 10 && anchoPie() > W - 72) tam--;
+  let x = 36;
+  c.textBaseline = 'middle'; c.fillStyle = SUAVE;
+  partes.forEach(function(p){
+    c.font = p[0] + ' ' + p[1] + ' ' + tam + 'px ' + FUENTE_TARJETA;
+    c.fillText(p[2], x, H - 24);
+    x += c.measureText(p[2]).width;
+  });
+  return cv;
+}
+
+async function tarjetaABlob(d){
+  const cv = await dibujarTarjeta(d);
+  return new Promise(function(res){ cv.toBlob(res, 'image/png'); });
+}
+
+// Se prepara la imagen en segundo plano para que, al pulsar "Compartir", el menú del móvil
+// se abra al instante (algunos navegadores exigen que se abra justo tras el toque).
+function programarTarjeta(){
+  clearTimeout(tarjetaTimer);
+  const d = datosTarjeta();
+  const firma = d ? JSON.stringify(d) : '';
+  if(firma !== tarjetaFirma){ tarjetaFirma = firma; tarjetaBlob = null; }
+  if(d && !tarjetaBlob) tarjetaTimer = setTimeout(obtenerTarjeta, 350);
+}
+
+async function obtenerTarjeta(){
+  const d = datosTarjeta();
+  if(!d) return null;
+  const firma = JSON.stringify(d);
+  if(tarjetaBlob && tarjetaFirma === firma) return tarjetaBlob;
+  const blob = await tarjetaABlob(d);
+  const ahora = datosTarjeta();
+  if(ahora && JSON.stringify(ahora) === firma){ tarjetaBlob = blob; tarjetaFirma = firma; }
+  return blob;
+}
+
+function descargarBlob(blob, nombre){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+}
+
+async function compartirResultado(){
+  const d = datosTarjeta();
+  if(!d) return;
+  const msg = $('compartirMsg');
+  msg.textContent = '';
+  let blob = null;
+  try{ blob = await obtenerTarjeta(); }catch(e){}
+  if(!blob){ msg.textContent = T('share_error'); return; }
+  const nombre = 'bolsa-puesto-' + d.puesto + '.png';
+  try{
+    const file = new File([blob], nombre, { type: 'image/png' });
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({
+        files: [file],
+        title: T('app_title_html').replace(/<br>/g, ' '),
+        text: T('h4_candidatos_delante') + ': ' + d.delante + ' · ' + T('share_cta') + ' ' + APP_URL
+      });
+      return;
+    }
+  }catch(e){
+    if(e && e.name === 'AbortError') return; // la persona cerró el menú de compartir
+  }
+  descargarBlob(blob, nombre);
+  msg.textContent = T('share_descargada');
+}
+
+async function descargarResultado(){
+  const d = datosTarjeta();
+  if(!d) return;
+  $('compartirMsg').textContent = '';
+  let blob = null;
+  try{ blob = await obtenerTarjeta(); }catch(e){}
+  if(!blob){ $('compartirMsg').textContent = T('share_error'); return; }
+  descargarBlob(blob, 'bolsa-puesto-' + d.puesto + '.png');
+}
+
+function actualizarCompartir(){
+  const d = datosTarjeta();
+  $('btnCompartir').disabled = !d;
+  $('btnDescargar').disabled = !d;
+  $('compartirHint').style.display = d ? 'none' : 'block';
+  $('compartirMsg').textContent = '';
+  programarTarjeta();
+}
+
 populateCategorias();
 restoreCategoriaState();
 populateSituaciones();
@@ -1247,6 +1526,8 @@ $('selDepartamento').addEventListener('change', function(){ cambiarSeleccion('de
 $('perfil').addEventListener('change', function(){ actualizar(); buscarPorNombre(); });
 $('puestoBuscado').addEventListener('input', actualizar);
 ['sit1','sit2','sit3','sit4'].forEach(id => $(id).addEventListener('change', actualizar));
+$('btnCompartir').addEventListener('click', compartirResultado);
+$('btnDescargar').addEventListener('click', descargarResultado);
 $('buscarNombre').addEventListener('input', buscarPorNombre);
 $('buscarNombre').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); buscarPorNombre(); } });
 
