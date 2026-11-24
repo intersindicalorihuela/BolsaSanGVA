@@ -806,7 +806,8 @@ const I18N = {
     compartir_hint: "Escribe un número de puesto válido para poder compartir el resultado.",
     share_descargada: "Tu navegador no permite compartir directamente. Se ha descargado la imagen: envíala por WhatsApp u otra app desde tu galería.",
     share_error: "No se ha podido generar la imagen. Inténtalo de nuevo.",
-    share_cta: "Consulta tu posición en la bolsa:",
+    share_consulta: "Consulta del",
+    share_situaciones: "Situaciones",
     card_header: "INTERSINDICAL SALUT Orihuela · BOLSA Sanidad GVA",
     card_puesto: "Puesto",
     card_segun: "Según las situaciones marcadas",
@@ -886,7 +887,8 @@ const I18N = {
     compartir_hint: "Escriu un número de lloc vàlid per a poder compartir el resultat.",
     share_descargada: "El teu navegador no permet compartir directament. S'ha descarregat la imatge: envia-la per WhatsApp o una altra app des de la galeria.",
     share_error: "No s'ha pogut generar la imatge. Torna-ho a provar.",
-    share_cta: "Consulta la teua posició en la borsa:",
+    share_consulta: "Consulta del",
+    share_situaciones: "Situacions",
     card_header: "INTERSINDICAL SALUT Orihuela · BORSA Sanitat GVA",
     card_puesto: "Lloc",
     card_segun: "Segons les situacions marcades",
@@ -1285,7 +1287,6 @@ function restoreCategoriaState(){
 // ==================== COMPARTIR RESULTADO (imagen para WhatsApp, etc.) ====================
 // Genera una tarjeta PNG con el resultado de la consulta y la comparte con el menú nativo del
 // móvil (WhatsApp, Telegram, correo...). Si el navegador no puede compartir archivos, la descarga.
-const APP_URL = 'https://intersindicalorihuela.github.io/BolsaSanGVA/';
 const FUENTE_TARJETA = '"Inter","Roboto","Helvetica Neue",Arial,sans-serif';
 let tarjetaBlob = null, tarjetaFirma = '', tarjetaTimer = null;
 
@@ -1469,6 +1470,21 @@ async function obtenerTarjeta(){
   return blob;
 }
 
+// Texto que acompaña a la imagen (formato WhatsApp: *negrita*, _cursiva_). No incluye enlaces.
+function textoCompartir(d){
+  let hoy = '';
+  try{ hoy = new Date().toLocaleDateString(LANG === 'va' ? 'ca-ES' : 'es-ES', {day:'numeric', month:'long', year:'numeric'}); }catch(e){}
+  const sit = d.situaciones.length ? d.situaciones.join(' + ') : T('card_sin_situaciones');
+  return '*' + T('card_header') + '*\n' +
+    T('share_consulta') + ' ' + hoy + '\n\n' +
+    T('fi_nombre') + ': ' + d.nombre + '\n' +
+    T('card_puesto') + ': ' + d.puesto + ' · ' + d.categoria + ' · ' + d.departamento + (d.perfil ? ' · ' + d.perfil : '') + '\n' +
+    T('share_situaciones') + ': ' + sit + '\n' +
+    T('h4_candidatos_delante') + ': ' + d.delante + '\n\n' +
+    T('card_footer_a') + ' ' + d.fecha + '\n' +
+    '_' + T('card_footer_no_oficial') + '_ ' + T('card_footer_de') + ' *Intersindical Salut Orihuela*.';
+}
+
 function descargarBlob(blob, nombre){
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1492,7 +1508,7 @@ async function compartirResultado(){
       await navigator.share({
         files: [file],
         title: T('app_title_html').replace(/<br>/g, ' '),
-        text: T('h4_candidatos_delante') + ': ' + d.delante + ' · ' + T('share_cta') + ' ' + APP_URL
+        text: textoCompartir(d)
       });
       return;
     }
