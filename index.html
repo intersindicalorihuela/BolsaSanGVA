@@ -1125,8 +1125,14 @@ function populateCategorias(){
   poblarSelectores(sel.value);
 }
 
+// Situaciones marcadas por defecto al abrir la app (solo la primera vez; luego se respeta lo que elija la persona).
+const SITUACIONES_POR_DEFECTO = ['DISPONIBLE', 'ACTIVO (DISPONIBLE ESPECIAL)', 'ACTIVO (No vacante) (DISPONIBLE ESPECIAL)'];
+let situacionesInicializadas = false;
+
 function populateSituaciones(){
-  ['sit1','sit2','sit3','sit4'].forEach(id=>{
+  const primeraVez = !situacionesInicializadas;
+  situacionesInicializadas = true;
+  ['sit1','sit2','sit3','sit4'].forEach((id, idx)=>{
     const sel = $(id);
     const prev = sel.value;
     sel.innerHTML = '<option value="" data-i18n="opt_situacion_vacia">' + T('opt_situacion_vacia') + '</option>';
@@ -1136,6 +1142,7 @@ function populateSituaciones(){
       sel.appendChild(opt);
     });
     if(prev) sel.value = prev;
+    else if(primeraVez && SITUACIONES_POR_DEFECTO[idx] && BOLSA_DATA.situaciones.indexOf(SITUACIONES_POR_DEFECTO[idx]) !== -1) sel.value = SITUACIONES_POR_DEFECTO[idx];
   });
 }
 
